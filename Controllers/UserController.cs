@@ -69,7 +69,7 @@ namespace greenSpotApi.Controllers
         public async Task<ActionResult<string>> Login(LoginDto request)
         {
             // Find user
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
             // Verify password using PasswordHasher
             if (user == null || !VerifyPassword(request.Password, user.PasswordHash))
@@ -142,5 +142,23 @@ namespace greenSpotApi.Controllers
 
             return tokenString;
         }
+        // Controllers/UserController.cs
+        [HttpGet("by-email/{email}")]
+        public async Task<ActionResult<UserDto>> GetUserDetailsByEmail(string email)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user == null) return NotFound(new { message = $"User with email {email} not found." });
+
+            var userDto = new UserDto
+            {
+                UserId = user.UserId,
+                Name = user.Username,
+                Email = user.Email
+            };
+            return Ok(userDto);
+        }
+
     }
 }
